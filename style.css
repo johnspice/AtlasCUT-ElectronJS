@@ -1,0 +1,191 @@
+#container2 { position: relative; }
+#canvasOriginalImage { border: 1px solid rgb(187, 187, 187); 
+  image-rendering: -moz-crisp-edges;
+image-rendering: -webkit-crisp-edges;
+image-rendering: pixelated;
+image-rendering: crisp-edges;
+ 
+}
+#canvasCutImage { 
+  border: 1px solid rgb(4, 0, 248); 
+  image-rendering: -moz-crisp-edges;
+image-rendering: -webkit-crisp-edges;
+image-rendering: pixelated;
+image-rendering: crisp-edges;
+
+}
+
+#canvasFrame { 
+  border: 1px solid rgb(3, 255, 16); 
+  image-rendering: -moz-crisp-edges;
+image-rendering: -webkit-crisp-edges;
+image-rendering: pixelated;
+image-rendering: crisp-edges;
+}
+
+#canvasAtlas { 
+  border: 1px solid  #b8b6b6;; 
+  image-rendering: -moz-crisp-edges;
+image-rendering: -webkit-crisp-edges;
+image-rendering: pixelated;
+image-rendering: crisp-edges;
+}
+
+#inpUploadimage{
+ 
+  color: rgb(0, 0, 0);
+  padding: 0.5rem;
+  font-family: sans-serif;
+  border-radius: 2px;
+  cursor: pointer;
+  margin-top: 1rem;
+}
+input[type="file"]
+{
+   -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background: linear-gradient(to top, rgb(163, 163, 163), rgb(255, 255, 255));
+    border: thin solid rgb(10, 10, 10);
+    font-size: 12px; 
+    cursor: text;
+    padding: .25em;
+    height: 20px;
+}
+
+input.inputSize{
+  font-size: 10px;
+  font-family: inherit;
+  height: 7px;;
+  padding: 0.25em 0.5em;
+  background-color: rgb(255, 255, 255);
+  border: 1px solid var(--input-border);
+  border-radius: 2px;
+  --input-border: rgb(2, 9, 12);
+  width: 20px;
+  
+}
+
+input.inputName{
+  font-size: 12px;
+  font-family: inherit;
+  height: 10px;;
+  padding: 0.25em 0.5em;
+  background-color: rgb(255, 255, 255);
+  border: 1px solid var(--input-border);
+  border-radius: 2px;
+  --input-border: rgb(2, 9, 12);
+  width: 150px;
+  
+}
+
+input:focus {
+  background-color: rgb(255, 255, 255);
+  border: 2px solid rgb(255, 0, 234);
+  outline: 0;
+}
+
+
+
+.divImageInput {
+  margin: auto;
+  width: 97%;
+  border: 1px solid rgb(1, 0, 5);
+  padding: 10px;
+  display: flex;
+  justify-content: space-between;
+
+  background-color: rgb(78, 89, 112);
+}
+
+.divAtlasControls{
+  display: inline-block;
+  height: 150px;
+  margin-right: -0.3em;
+  vertical-align:top;
+  
+
+  padding: 10px;
+}
+
+.divFrameControls{
+  padding-left: 1%;
+}
+
+body {
+  background-color: rgb(37, 44, 59);
+  color: #e0e0e0;
+  font-size: 12px;
+}
+
+
+/*   cuatom buttons  --------------------------------------------------------------*/
+/*///////////////////////////////////////////////////////////////////////////////////////*/
+.button-24 {
+  background: #FF4742;
+  border: 1px solid #FF4742;
+  border-radius: 3px;
+  box-shadow: rgba(0, 0, 0, 0.1) 1px 2px 4px;
+  box-sizing: border-box;
+  color: #FFFFFF;
+  cursor: pointer;
+  display: inline-block;
+  font-family: nunito,roboto,proxima-nova,"proxima nova",sans-serif;
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 16px;
+  min-height: 30px;
+  outline: 0;
+  padding: 12px 14px;
+  text-align: center;
+  text-rendering: geometricprecision;
+  text-transform: none;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  vertical-align: middle;
+}
+
+.button-24:hover,
+.button-24:active {
+  background-color: initial;
+  background-position: 0 0;
+  color: #FF4742;
+}
+
+.button-24:active {
+  opacity: .5;
+}
+
+/*////////////////////////////////////////////////////////////////////////////////*/
+
+.button-41 {
+  background-color: initial;
+  background-image: linear-gradient(-180deg, #f9fafc, #c2c2c4);
+  border-radius: 1px;
+  box-shadow: rgba(0, 0, 0, 0.1) 0 2px 4px;
+  color: #070606;
+  cursor: pointer;
+  display: inline-block;
+  font-family: Inter,-apple-system,system-ui,Roboto,"Helvetica Neue",Arial,sans-serif;
+  height: 20px;
+  width: 65px;
+  outline: 0;
+  overflow: hidden;
+  font-size: 10px;
+  pointer-events: auto;
+  position: relative;
+  text-align: center;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+  vertical-align: top;
+  white-space: nowrap;
+  z-index: 9;
+  border: 0;
+}
+
+.button-41:hover {
+  background: #f9fafa;
+  color: #030000;
+}

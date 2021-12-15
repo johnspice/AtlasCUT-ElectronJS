@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Atlas CUT</title>
+	<meta charset="utf-8">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+
+  </head>
+  
+  <body>
+    
+	 
+    <input type='file' name='img' size='65' id='inpUploadimage' />
+    
+    <div class="divImageInput">
+      <div id="container2">
+          <canvas id="canvasOriginalImage" width="280" height="288" style="border-style: solid;"></canvas>
+          <canvas hidden id="canvasCutImage"      width="200" height="200" style="border-style: solid;"> </canvas>
+      </div>
+      <div class="divFrame">
+        <canvas id="canvasFrame" width="50" height="100"></canvas>
+        <div class="divFrameControls">
+          w:<input id="inpWcf" type="text" name="fname" value="50" class="inputSize">
+          h:<input id="inpHcf" type="text" name="fname" value="100" class="inputSize">
+          <button id="" class="button-41" onclick="setSizeCanvasFrame()">Set Size</button>
+          <br>    <br>    <br>   
+          <button  class="button-41"  onclick="addFrame()" >Add Frame</button>
+          <br>    <br>   
+          <label id="lbCountFrame">Frame:0</label>
+        </div>
+      </div>
+    </div>
+
+    <br>   
+    <canvas id="canvasAtlas" width="50" height="100"></canvas>
+    <div class="divAtlasControls">
+      <button class="button-41" onclick="setVHframes()" >Reset Frames</button>
+      <br>   <br> 
+      VFrames:<input id="inpVf" type="text" name="fname" value="1" class="inputSize">
+      <br>  
+      HFrames:<input id="inpHf" type="text" name="fname" value="1" class="inputSize">
+      <br>   <br>   <br>   <br>  
+      Name:<input id="inpNameAtlas" type="text" name="fname" value="AtlasSprite.png" class="inputName">
+      <br>   <br>  
+      <button class="button-41" onclick="DownloadCanvasAsImage()">Save Atlas</button>
+    </div>
+
+    <script src="canvasCut.js"></script>
+
+    <script>    
+
+
+        var INTERVAL = 20;  // how often, in milliseconds, we check to see if a redraw is needed
+        var PointsSelectionHandles = [];//puntos para la zona resize
+        var boxes2 = [];// los 8 puntos para el resize de la zona a recortar
+        // 0  1  2
+        // 3     4
+        // 5  6  7
+        var image=new Image();//Imagen que carga el usuario
+        var isDrawOriginalImage = false;
+        var isAddImageForUSer=false;
+        var mx, my; // mouse coordinates
+        var isDrag = false;
+        var isResizeDrag = false;
+        var PointToResize = -1;
+        var PointSize = 4;//tamaño de puntos para el resize
+        var lineWidth = 1;//grueso de la linea para el resize
+        //canvas
+        var canvasOriginalImage;
+        var canvasCutImage = document.getElementById("canvasCutImage");
+        cictx = canvasCutImage.getContext("2d");
+        var ctxOriginalImage;
+        var ghostcanvas;
+        var gctx; 
+        
+        //colors
+        var ColBorderSelection = 'rgb(0,250,0)';
+        var ColBackgrSelection='rgba(0,250,0,0.2)'; 
+        var ColPointResize = '#FF008B'; 
+
+        
+        (function(window)  {//-------------------------------------------------------------------------------------------------
+          
+              var mySel = null;
+              var offsetx, offsety;
+              var stylePaddingLeft, stylePaddingTop, styleBorderLeft, styleBorderTop;
+
+              function Box2() {
+                this.x = 0;this.y = 0;
+                this.w = 1;this.h = 1;   
+                this.fill = '#444444';
+              }
+              // New methods on the Box class
+              Box2.prototype = {
+                // we used to have a solo draw function
+                // but now each box is responsible for its own drawing
+                // mainDraw() will call this with the normal canvas
+                // myDown will call this with the ghost canvas with 'black'
+                draw: function(context, optionalColor) { 
+                    if (context === gctx) {
+                      context.fillStyle = 'black'; // always want black for the ghost canvas
+                    } else {
+                      context.fillStyle = this.fill;
+                    }
+
+                    // We can skip the drawing of elements that have moved off the screen:
+                    if (this.x > canvasOriginalImage.width || this.y > canvasOriginalImage.height) return; 
+                    if (this.x + this.w < 0 || this.y + this.h < 0) return; //dibujar solo si el rectangulo esta dentro del de la imagen
+                    
+                    console.log("x:"+this.x+"    x+w:"+(this.x+this.w)+"   imageW:"+image.width);
+                    console.log("y:"+this.y+"    y+h:"+(this.y+this.h)+"   imageH:"+image.height);
+                    context.fillRect(this.x,this.y,this.w,this.h);
+                    
+                    // this is a stroke along the box and also 8 new selection handles
+                    if (mySel === this) {
+                          context.strokeStyle = ColBorderSelection;
+                          context.lineWidth = lineWidth;
+                          context.strokeRect(this.x,this.y,this.w,this.h);
+                          // draw the boxes
+                          var half = PointSize / 2;
+                          
+                          PointsSelectionHandles[0].x = this.x-half;            PointsSelectionHandles[0].y = this.y-half;
+                          PointsSelectionHandles[1].x = this.x+this.w/2-half;   PointsSelectionHandles[1].y = this.y-half;
+                          PointsSelectionHandles[2].x = this.x+this.w-half;     PointsSelectionHandles[2].y = this.y-half;
+                          PointsSelectionHandles[3].x = this.x-half;            PointsSelectionHandles[3].y = this.y+this.h/2-half;
+                          PointsSelectionHandles[4].x = this.x+this.w-half;     PointsSelectionHandles[4].y = this.y+this.h/2-half;
+                          PointsSelectionHandles[6].x = this.x+this.w/2-half;   PointsSelectionHandles[6].y = this.y+this.h-half;
+                          PointsSelectionHandles[5].x = this.x-half;            PointsSelectionHandles[5].y = this.y+this.h-half;
+                          PointsSelectionHandles[7].x = this.x+this.w-half;     PointsSelectionHandles[7].y = this.y+this.h-half;
+                          context.fillStyle = ColPointResize;
+
+                          for (var i = 0; i < 8; i ++) {
+                            var cur = PointsSelectionHandles[i];
+                            context.fillRect(cur.x, cur.y, PointSize, PointSize);
+                          }
+                    }
+                } // end draw
+              }
+              
+              function draw(ev) {
+                  var f = document.getElementById("inpUploadimage").files[0];
+                  var  url = window.URL || window.webkitURL;
+                  image.src = url.createObjectURL(f);
+                  image.onload = function() {
+                      canvasOriginalImage.width=image.width;
+                      canvasOriginalImage.height=image.height;
+                      ghostcanvas.height = canvasOriginalImage.height;
+                      ghostcanvas.width  = canvasOriginalImage.width;
+                      ctxOriginalImage.drawImage(image, 0, 0,image.width,image.height);
+                      addRect(1,1, 30, 48 ,ColBackgrSelection);
+                      isAddImageForUSer=true;
+                 }
+              }
+                          
+              //Initialize a new Box, add it, and invalidate the canvas
+              function addRect(x, y, w, h,fill) {
+                var rect = new Box2;
+                rect.x = x; rect.y = y;
+                rect.w = w;rect.h = h;    
+                rect.fill = fill;
+                boxes2.push(rect);
+                invalidate();
+              }
+
+              // initialize our canvas, add a ghost canvas, set draw loop
+              // then add everything we want to intially exist on the canvas
+              function init2() {
+                canvasOriginalImage = document.getElementById('canvasOriginalImage');
+                document.getElementById("inpUploadimage").addEventListener("change", draw, false);   
+                ctxOriginalImage = canvasOriginalImage.getContext('2d');        
+                ghostcanvas = document.createElement('canvas');
+                gctx = ghostcanvas.getContext('2d');
+                ghostcanvas.height = canvasOriginalImage.height;
+                ghostcanvas.width  = canvasOriginalImage.width;
+               
+                //fixes a problem where double clicking causes text to get selected on the canvas
+                canvasOriginalImage.onselectstart = function () { return false; }
+
+                // fixes mouse co-ordinate problems when there's a border or padding
+                // see getMouse for more detail
+                if (document.defaultView && document.defaultView.getComputedStyle) {
+                  stylePaddingLeft = parseInt(document.defaultView.getComputedStyle(canvasOriginalImage, null)['paddingLeft'], 10)     || 0;
+                  stylePaddingTop  = parseInt(document.defaultView.getComputedStyle(canvasOriginalImage, null)['paddingTop'], 10)      || 0;
+                  styleBorderLeft  = parseInt(document.defaultView.getComputedStyle(canvasOriginalImage, null)['borderLeftWidth'], 10) || 0;
+                  styleBorderTop   = parseInt(document.defaultView.getComputedStyle(canvasOriginalImage, null)['borderTopWidth'], 10)  || 0;
+                }
+
+                // make mainDraw() fire every INTERVAL milliseconds
+                setInterval(mainDraw, INTERVAL);
+                // set our events. Up and down are for dragging,
+                canvasOriginalImage.onmousedown = myDown;
+                canvasOriginalImage.onmouseup = myUp;
+                canvasOriginalImage.onmousemove = myMove;
+
+                // set up the selection handle boxes
+                for (var i = 0; i < 9; i ++) {
+                  var rect = new Box2;
+                  PointsSelectionHandles.push(rect);
+                }   
+                // add custom initialization here, add a large green rectangle
+                addRect(1,1, 30, 48 ,ColBackgrSelection);
+              }
+      
+              //wipes the canvas context
+              function clear(c) {
+                c.clearRect(0, 0,canvasOriginalImage.width, canvasOriginalImage.height);
+              }
+            
+              // Main draw loop.
+              // While draw is called as often as the INTERVAL variable demands,
+              // It only ever does something if the canvas gets invalidated by our code
+                  
+              function mainDraw() {
+                if (isDrawOriginalImage == false) {
+                  clear(ctxOriginalImage);
+                  // Add stuff you want drawn in the background all the time here   
+                  // draw all boxes
+                  ctxOriginalImage.drawImage(image, 0, 0, canvasOriginalImage.width, canvasOriginalImage.height);  
+                  boxes2[0].draw(ctxOriginalImage); // we used to call drawshape, but now each box draws itself 
+                  // Add stuff you want drawn on top all the time here 
+                  isDrawOriginalImage = true;
+                }
+              }
+
+              function forceBoxIntoCanvas(){
+                mySel.x = mx - offsetx;    mySel.y = my - offsety;  
+                if(mySel.x<0){ mySel.x=0;}
+                if((mySel.x+mySel.w)>canvasOriginalImage.width){mySel.x=canvasOriginalImage.width-mySel.w;}
+                if(mySel.y<0){mySel.y=0;}
+                if((mySel.y+mySel.h)>canvasOriginalImage.height){mySel.y=canvasOriginalImage.height-mySel.h;}
+              }
+
+              // Happens when the mouse is moving inside the canvas
+              function myMove(e){             
+                if (isDrag) {
+                  getMouse(e);
+                  forceBoxIntoCanvas();  
+                  invalidate();
+                } else if (isResizeDrag) {
+                    var oldx = mySel.x;    var oldy = mySel.y;
+                    switch (PointToResize) {
+                      case 0:   mySel.x = mx;           mySel.y = my;
+                                mySel.w += oldx - mx;   mySel.h += oldy - my; break;
+                      case 1:   mySel.y = my;   
+                                mySel.h += oldy - my;                         break;
+                      case 2:   mySel.y = my;
+                                mySel.w = mx - oldx;    mySel.h += oldy - my; break;
+                      case 3:   mySel.x = mx;
+                                mySel.w += oldx - mx;                         break;
+                      case 4:   mySel.w = mx - oldx;                          break;
+                      case 5:   mySel.x = mx;
+                                mySel.w += oldx - mx;   mySel.h = my - oldy;  break;
+                      case 6:   mySel.h = my - oldy;                          break;
+                      case 7:   mySel.w = mx - oldx;    mySel.h = my - oldy;  break;
+                  }
+                  invalidate();
+                }
+
+                getMouse(e);
+                // if there's a selection see if we grabbed one of the selection handles
+                if (mySel !== null && !isResizeDrag) {
+                  for (var i = 0; i < 8; i++) {
+                    var cur = PointsSelectionHandles[i];
+                    // we dont need to use the ghost context because
+                    // selection handles will always be rectangles
+                    if (mx >= cur.x && mx <= cur.x + PointSize &&  my >= cur.y && my <= cur.y + PointSize) {
+                      // we found one!
+                      PointToResize = i;
+                      invalidate();
+                      switch (i) {
+                        case 0:this.style.cursor='nw-resize';break;
+                        case 1:this.style.cursor='n-resize';break;
+                        case 2:this.style.cursor='ne-resize';break;
+                        case 3:this.style.cursor='w-resize';break;
+                        case 4:this.style.cursor='e-resize';break;
+                        case 5:this.style.cursor='sw-resize';break;
+                        case 6:this.style.cursor='s-resize';break;
+                        case 7:this.style.cursor='se-resize';break;
+                      }
+                      return;
+                    }
+                  }
+                  // not over a selection box, return to normal
+                  isResizeDrag = false;
+                  PointToResize = -1;
+                  this.style.cursor='auto';
+                }
+              }
+                 
+              // Happens when the mouse is clicked in the canvas
+              function myDown(e){
+                getMouse(e);
+                //we are over a selection box
+                if (PointToResize !== -1) {
+                  isResizeDrag = true;
+                  return;
+                }
+                clear(gctx);
+                // draw shape onto ghost context
+                boxes2[0].draw(gctx, 'black');
+                // get image data at the mouse x,y pixel
+                var imageData = gctx.getImageData(mx, my, 1, 1);
+                var index = (mx + my * imageData.width) * 4;
+                // if the mouse in rectangle 
+                if (imageData.data[3] > 0) {
+                    mySel = boxes2[0];
+                    offsetx = mx - mySel.x;    offsety = my - mySel.y;
+                    mySel.x = mx - offsetx;    mySel.y = my - offsety;
+                    isDrag = true;
+                    invalidate();
+                    clear(gctx);
+                    return;
+                }
+                mySel = null;// havent returned means we have selected nothing
+                clear(gctx); // clear the ghost canvas for next time
+                invalidate(); // invalidate because we might need the selection border to disappear
+              }
+                 
+                  
+              function myUp(){
+                isDrag = false;
+                isResizeDrag = false;
+                PointToResize = -1;
+               
+                showPoints();
+              }
+                  
+              function invalidate() {
+                isDrawOriginalImage = false;
+              }
+
+              // Sets mx,my to the mouse position relative to the canvas
+              // unfortunately this can be tricky, we have to worry about padding and borders
+              function getMouse(e) {
+                    var element = canvasOriginalImage, offsetX = 0, offsetY = 0;
+                    if (element.offsetParent) {do {
+                        offsetX += element.offsetLeft;    offsetY += element.offsetTop;
+                      } while ((element = element.offsetParent));
+                    }
+                    // Add padding and border style widths to offset
+                    offsetX += stylePaddingLeft;
+                    offsetY += stylePaddingTop;
+                    offsetX += styleBorderLeft;
+                    offsetY += styleBorderTop;
+                    mx = e.pageX - offsetX;     my = e.pageY - offsetY
+              }
+
+              // If you dont want to use <body onLoad='init()'>
+              // You could uncomment this init() reference and place the script reference inside the body tag
+              //init();
+              window.init2 = init2;
+              window.addRect = addRect;   
+             
+            
+        })(window);//---------------------------------------------------------------------------------------------------------------------
+
+
+        // se  puee remplazar por <body onLoad="init2()">
+        $(document).ready(function(){
+          init2();
+        });
+         
+       
+        function showPoints(){
+          var boxes=boxes2;
+          cictx.clearRect(0, 0, canvasCutImage.width, canvasCutImage.height);
+
+          canvasCutImage.width= boxes[0].w*1;
+          canvasCutImage.height=boxes[0].h*1;
+
+          cictx.drawImage(image,
+            boxes[0].x,  boxes[0].y,  boxes[0].w,  boxes[0].h,
+            0, 0,  boxes[0].w*1,  boxes[0].h*1
+          );
+        }
+            
+        function DownloadCanvasAsImage(){
+          var link = document.createElement('a');
+          link.download = document.getElementById("inpNameAtlas").value;
+          link.href = document.getElementById('canvasAtlas').toDataURL();
+          link.click();
+        }
+
+    </script>
+
+
+  </body>
+</html>
