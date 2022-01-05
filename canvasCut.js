@@ -27,6 +27,7 @@
 			canvasFrame = document.getElementById("canvasFrame");
 			ctxCanvasFrame = canvasFrame.getContext("2d");
           
+            document.getElementById("lbSizeAtlas").innerHTML =""+canvasAtlas.width+"x"+ canvasAtlas.height+"px";
 
 			cw = canvasFrame.width;
 			ch = canvasFrame.height;
@@ -78,7 +79,9 @@
             heightframe=document.getElementById("inpHcf").value;
             canvasFrame.width=widthFrame;   canvasFrame.height=heightframe;
             ctxAtlas.clearRect(0, 0, canvasFrame.width, canvasFrame.height);
-            //cw=w;ch=h;
+
+            setVHframes();
+            
         }
 
         function setVHframes(){
@@ -90,6 +93,8 @@
             countFrames=0;
 
             iframe=0; jframe=0;
+
+            document.getElementById("lbSizeAtlas").innerHTML =""+canvasAtlas.width+"x"+ canvasAtlas.height+"px";
 
             document.getElementById("lbCountFrame").innerHTML = "Frame:"+countFrames;
             document.getElementById('lbCountFrame').style.color = "white";
@@ -116,6 +121,36 @@
             }
            
         }
+
+        function setZoom(zoom,el) {
+            transformOrigin = [0,0];
+            el = el || instance.getContainer();
+            var p = ["webkit", "moz", "ms", "o"],
+            s = "scale(" + zoom + ")",
+            oString = (transformOrigin[0] * 100) + "% " + (transformOrigin[1] * 100) + "%";
+      
+            for (var i = 0; i < p.length; i++) {
+                  el.style[p[i] + "Transform"] = s;
+                  el.style[p[i] + "TransformOrigin"] = oString;
+            }
+      
+            el.style["transform"] = s;
+            el.style["transformOrigin"] = oString;  
+        }
+
+
+
+        function zoomAtlas(a){
+            var zoomScale = a/4;
+            setZoom(zoomScale,document.getElementsByClassName('divAtlas')[0])
+        }
+
+        function zoomFrame(a){
+            var zoomScale = a/4;
+            setZoom(zoomScale,document.getElementsByClassName('divCanvasFrame')[0])
+        }
+
+
 
 
 		Init();

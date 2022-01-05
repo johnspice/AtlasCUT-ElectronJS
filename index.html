@@ -12,39 +12,69 @@
     
 	 
     <input type='file' name='img' size='65' id='inpUploadimage' />
-    
+     <br> 
+    <label id="lbSizeImageOriginal">No Image</label>
+    <label id="lbSizeZonaCut">20x40 px</label>
     <div class="divImageInput">
       <div id="container2">
           <canvas id="canvasOriginalImage" width="280" height="288" style="border-style: solid;"></canvas>
           <canvas hidden id="canvasCutImage"      width="200" height="200" style="border-style: solid;"> </canvas>
       </div>
       <div class="divFrame">
-        <canvas id="canvasFrame" width="50" height="100"></canvas>
-        <div class="divFrameControls">
-          w:<input id="inpWcf" type="text" name="fname" value="50" class="inputSize">
-          h:<input id="inpHcf" type="text" name="fname" value="100" class="inputSize">
-          <button id="" class="button-41" onclick="setSizeCanvasFrame()">Set Size</button>
-          <br>    <br>    <br>   
-          <button  class="button-41"  onclick="addFrame()" >Add Frame</button>
-          <br>    <br>   
-          <label id="lbCountFrame">Frame:0</label>
+        <input id="test" min="4" max="10" value='4' step="1" onchange="zoomFrame(this.value)" type="range"/>
+        <div class="divCanvasFrame">
+          <canvas id="canvasFrame" width="50" height="100"></canvas>
         </div>
+        
       </div>
+      <div class="divFrameControls">
+        <label id="lbCountFrame">Size Frame</label>
+        <br>
+        w:<input id="inpWcf" type="text" name="fname" value="50" class="inputSize">
+        h:<input id="inpHcf" type="text" name="fname" value="100" class="inputSize">
+        <br>  <br>
+        <button id="" class="button-41" onclick="setSizeCanvasFrame()">Set Size</button>
+        <br>    <br> 
+        <button  class="button-41"  onclick="addFrame()" >Add Frame</button>
+        <br>    <br>   
+        <label id="lbCountFrame">Frame:0</label>
+      </div>
+
     </div>
 
-    <br>   
-    <canvas id="canvasAtlas" width="50" height="100"></canvas>
-    <div class="divAtlasControls">
-      <button class="button-41" onclick="setVHframes()" >Reset Frames</button>
-      <br>   <br> 
-      VFrames:<input id="inpVf" type="text" name="fname" value="1" class="inputSize">
-      <br>  
-      HFrames:<input id="inpHf" type="text" name="fname" value="1" class="inputSize">
-      <br>   <br>   <br>   <br>  
-      Name:<input id="inpNameAtlas" type="text" name="fname" value="AtlasSprite.png" class="inputName">
-      <br>   <br>  
-      <button class="button-41" onclick="DownloadCanvasAsImage()">Save Atlas</button>
+    <br>  
+    <label id="lbSizeAtlas">Not Frame</label>
+    <br>  
+    <input id="test" min="4" max="10" value='4' step="1" onchange="zoomAtlas(this.value)" type="range"/>
+
+    <br>  
+
+    <div class="containerAtlas">
+      <div class="divAtlas">
+        <canvas id="canvasAtlas" width="50" height="100"></canvas>
+      </div>  
+        
+       
+      <div class="divAtlasControls">
+         
+        <br>   VFrames:<input id="inpVf" type="text" name="fname" value="1" class="inputSize">
+        <br>   HFrames:<input id="inpHf" type="text" name="fname" value="1" class="inputSize">
+        <br>   <button class="button-41" onclick="setVHframes()" >Reset Frames</button>
+        <br><br><br><br>  
+        Name:<input id="inpNameAtlas" type="text" name="fname" value="AtlasSprite.png" class="inputName">
+        <br>  <button class="button-41" onclick="DownloadCanvasAsImage()">Save Atlas</button>
+        </div>
     </div>
+      
+
+  
+
+
+    
+
+
+
+
 
     <script src="canvasCut.js"></script>
 
@@ -57,6 +87,8 @@
         // 0  1  2
         // 3     4
         // 5  6  7
+        var zonaCutInitW=20;//tamaño de zona de corte inicial
+        var zonaCutInitH=40;
         var image=new Image();//Imagen que carga el usuario
         var isDrawOriginalImage = false;
         var isAddImageForUSer=false;
@@ -111,6 +143,8 @@
                     console.log("x:"+this.x+"    x+w:"+(this.x+this.w)+"   imageW:"+image.width);
                     console.log("y:"+this.y+"    y+h:"+(this.y+this.h)+"   imageH:"+image.height);
                     context.fillRect(this.x,this.y,this.w,this.h);
+
+                    document.getElementById("lbSizeZonaCut").innerHTML ="Cut:"+this.w+"x"+this.h+" px";
                     
                     // this is a stroke along the box and also 8 new selection handles
                     if (mySel === this) {
@@ -145,10 +179,11 @@
                   image.onload = function() {
                       canvasOriginalImage.width=image.width;
                       canvasOriginalImage.height=image.height;
+                      document.getElementById("lbSizeImageOriginal").innerHTML ="Image:"+image.width+"x"+image.height+" px";
                       ghostcanvas.height = canvasOriginalImage.height;
                       ghostcanvas.width  = canvasOriginalImage.width;
                       ctxOriginalImage.drawImage(image, 0, 0,image.width,image.height);
-                      addRect(1,1, 30, 48 ,ColBackgrSelection);
+                      addRect(1,1,zonaCutInitW, zonaCutInitH ,ColBackgrSelection);
                       isAddImageForUSer=true;
                  }
               }
@@ -199,7 +234,7 @@
                   PointsSelectionHandles.push(rect);
                 }   
                 // add custom initialization here, add a large green rectangle
-                addRect(1,1, 30, 48 ,ColBackgrSelection);
+                addRect(1,1,zonaCutInitW, zonaCutInitH ,ColBackgrSelection);
               }
       
               //wipes the canvas context
@@ -380,6 +415,11 @@
           link.download = document.getElementById("inpNameAtlas").value;
           link.href = document.getElementById('canvasAtlas').toDataURL();
           link.click();
+        }
+
+        function setLabelSize(){
+          document.getElementById("lbSizeImageOriginal").innerHTML ="";
+          document.getElementById("lbSizeAtlas").innerHTML ="";
         }
 
     </script>

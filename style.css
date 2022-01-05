@@ -24,7 +24,7 @@ image-rendering: crisp-edges;
 }
 
 #canvasAtlas { 
-  border: 1px solid  #b8b6b6;; 
+  border: 1px solid  #fc0193; 
   image-rendering: -moz-crisp-edges;
 image-rendering: -webkit-crisp-edges;
 image-rendering: pixelated;
@@ -34,11 +34,12 @@ image-rendering: crisp-edges;
 #inpUploadimage{
  
   color: rgb(0, 0, 0);
-  padding: 0.5rem;
+  padding: 0.2rem;
   font-family: sans-serif;
   border-radius: 2px;
   cursor: pointer;
   margin-top: 1rem;
+  margin: 10px;
 }
 input[type="file"]
 {
@@ -85,6 +86,26 @@ input:focus {
   outline: 0;
 }
 
+#lbSizeImageOriginal{
+  font-family: 'Courier New', monospace;
+  margin: 10px;
+  color: #ffffff;
+}
+#lbSizeZonaCut{
+  font-family: 'Courier New', monospace;
+  margin: 60px;
+  color: #16fc01;
+}
+#lbSizeAtlas{
+  font-family: 'Courier New', monospace;
+  margin: px;
+  color: #fc0193;
+}
+
+
+
+/*----------------------------------   DIVS ------------------------------------*/
+
 
 
 .divImageInput {
@@ -98,20 +119,24 @@ input:focus {
   background-color: rgb(78, 89, 112);
 }
 
-.divAtlasControls{
-  display: inline-block;
-  height: 150px;
-  margin-right: -0.3em;
-  vertical-align:top;
-  
-
-  padding: 10px;
-}
-
 .divFrameControls{
   padding-left: 1%;
 }
 
+
+
+.containerAtlas {
+  width:100%;
+}
+.divAtlas{
+  float:left;
+  background-color: #6b4342;
+}
+.divAtlasControls{
+  float:right;
+}
+
+/*---------------------------------------------------------------------------------*/
 body {
   background-color: rgb(37, 44, 59);
   color: #e0e0e0;
@@ -186,6 +211,22 @@ body {
 }
 
 .button-41:hover {
+  background: #f9fafa;
+  color: #030000;
+}
+
+.button-zoom {
+  background-image: linear-gradient(-180deg, #f9fafc, #c2c2c4);
+  border-radius: 5px;
+  color: #070606;
+  font-family: Inter,-apple-system,system-ui,Roboto,"Helvetica Neue",Arial,sans-serif;
+  height: 10px;
+  width: 25px;
+  font-size: 8px;
+  padding-bottom: 15px;
+}
+
+.button-zoom:hover {
   background: #f9fafa;
   color: #030000;
 }
